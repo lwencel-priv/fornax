@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
 from typing import List, Optional
 
 
@@ -41,3 +42,10 @@ class Command:
     @property
     def daemon(self) -> List[str]:
         return self._daemon
+
+    def __str__(self) -> str:
+        return json.dumps({
+            "args": self._args,
+            "cwd": self._cwd,
+            "daemon": self._daemon,
+        })

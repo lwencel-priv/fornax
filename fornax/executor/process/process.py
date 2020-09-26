@@ -24,7 +24,7 @@ import subprocess
 from threading import Thread
 from typing import Optional
 
-from fornax.logger import console_logger
+from fornax.logger import console_logger, main_logger
 from ..command import Command
 
 
@@ -34,6 +34,7 @@ class Process:
         self._command = command
         self._return_code = None
 
+        main_logger.debug(f"Running: {self._command}")
         self._process = subprocess.Popen(
             self._command.args,
             cwd=self._command.cwd,
@@ -58,7 +59,7 @@ class Process:
 
     def _collect_stderr(self) -> None:
         for line in self._process.stderr:
-            console_logger.error(line.strip())
+            console_logger.warning(line.strip())
 
     @property
     def return_code(self) -> Optional[int]:

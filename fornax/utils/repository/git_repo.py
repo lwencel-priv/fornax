@@ -21,21 +21,31 @@
 # SOFTWARE.
 
 from multiprocessing import cpu_count
+
 from fornax.executor.command import Command
 from fornax.executor import BashShellExecutor
+from fornax.logger import main_logger
 
 
 class GitRepo:
-    def __init__(self, manifest_path: str):
+    def __init__(self, manifest_path: str, branch: str, workspace: str):
         self.__executor = BashShellExecutor()
         self.__manifest_path = manifest_path
+        self.__branch = branch
+        self.__workspace = workspace
 
     def sync(self) -> None:
+        repo_init_command = ["repo", "init", "-u", self.__manifest_path]
+        if self.__branch is not None:
+            repo_init_command += ["-b", self.__branch]
+
         commands = [
-            Command(["repo", "init", "-u", self.__manifest_path]),
-            Command(["repo", "forall", "git", "reset", "--hard"]),
-            Command(["repo", "forall", "git", "clean", "-dfx"]),
-            Command(["repo", "sync", "-j", cpu_count()]),
+            Command(repo_init_command, cwd=self.__workspace),
+            Command(["repo", "forall", "git reset --hard"], cwd=self.__workspace),
+            Command(["repo", "forall", "git clean -dfx"], cwd=self.__workspace),
+            Command(["repo", "sync", "-j", str(max(cpu_count() - 2, 1))], cwd=self.__workspace),
         ]
+        main_logger.info("Starting repositories synchronization.")
         for command in commands:
             self.__executor.run(command)
+        main_logger.info("Repositories synchronization done.")
