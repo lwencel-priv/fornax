@@ -21,11 +21,13 @@
 # SOFTWARE.
 
 import os
-from argparse import ArgumentParser, Namespace
+import sys
+from argparse import Namespace
 
 from fornax.executor import BashShellExecutor
 from fornax.executor.command import Command
 from fornax.utils.repository.git_repo import GitRepo
+from fornax.utils import DynamicArgumentParser
 
 
 class Pipeline:
@@ -33,19 +35,14 @@ class Pipeline:
     def __init__(self, args: Namespace) -> None:
         self._args = args
         os.makedirs(self._args.workspace, exist_ok=True)
-        self._repo = GitRepo(self._args.repo, self._args.branch, self._args.workspace)
+        self._repo = GitRepo(self._args.repository, self._args.branch, self._args.workspace)
 
     def execute(self):
         self._repo.sync()
 
 
 if __name__ == "__main__":
-    parser = ArgumentParser(description='Project build pipeline.')
-    parser.add_argument('--repo', dest='repo', required=True, help='')
-    parser.add_argument('--branch', dest='branch', required=False, default=None, help='')
-    parser.add_argument('--workspace', dest='workspace', required=True, help='workspace')
-    parser.add_argument('--stage', dest='stage',help='')
-    args = parser.parse_known_args()
-
-    pipeline = Pipeline(args[0])
+    parser = DynamicArgumentParser(description='Project build pipeline.')
+    args = parser.parse_args(sys.argv[1:])
+    pipeline = Pipeline(args)
     pipeline.execute()

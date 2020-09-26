@@ -21,28 +21,31 @@
 # SOFTWARE.
 
 from argparse import ArgumentParser, Namespace
+from typing import Optional, List
 
 from fornax.consts import Stages
 
 
-class APIArgumentParser:
+class DynamicArgumentParser:
 
-    def __init__(self):
-        parser = ArgumentParser(description='Project build pipeline.')
-        parser.add_argument('--workspace', dest='workspace', required=True, help='workspace')
-        parser.add_argument('--stage', dest='stage', help='')
-        self._initial_args = parser.parse_known_args()
+    def __init__(self, description: str) -> None:
+        self._parser = ArgumentParser(description=description)
+        self._parser.add_argument('--workspace', dest='workspace', required=True, help='workspace')
+        self._parser.add_argument('--stage', dest='stage', help='')
 
     def _get_stage_parameters(self, stage: Stages) -> dict:
-        default = {
-            "--workspace": {"dest":"workspace", "required": True, "help": ""},
-            "--stage": {"dest":"stage", "required": True, "help": ""},
-        }
-
         stage_specific_params = {
             Stages.SYNC_REPOSITORIES: {
                 "--repository": {"dest":"repository", "required": True, "help": ""},
                 "--branch": {"dest":"branch", "required": False, "default": None, "help": ""},
             }
         }
-        return default.update(stage_specific_params.get(stage, {}))
+        return stage_specific_params.get(Stages(stage), {})
+
+    def parse_args(self, args: List[str]) -> Namespace:
+        parsed_args, unknown_args = self._parser.parse_known_args(args)
+        stage_specific_parameters = self._get_stage_parameters(parsed_args.stage)
+        for key, value in stage_specific_parameters.items():
+            self._parser.add_argument(key, **value)
+
+        return self._parser.parse_args(args)
