@@ -3,4 +3,11 @@
 
 # Python
 .venv
+.tox
 __pycache__
+.mypy_cache
+*.pyc
+
+# Other
+tmp
+tox_files
