@@ -1,0 +1,2 @@
+class ExecutorError(BaseException):
+    pass

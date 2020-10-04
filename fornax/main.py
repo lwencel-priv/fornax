@@ -2,8 +2,8 @@ import os
 import sys
 from argparse import Namespace
 
-from fornax.utils.repository import RepositoryFactory
 from fornax.utils.argparser import DynamicArgumentParser
+from fornax.utils.repository import RepositoryFactory
 
 
 class Pipeline:
