@@ -12,4 +12,4 @@ class BashShellExecutor(Executor):
         :return: process instance
         :rtype: Process
         """
-        return Process(command)
+        return Process(command, self._workspace)

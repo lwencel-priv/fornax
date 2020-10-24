@@ -1,9 +1,8 @@
-import os
 import sys
 from argparse import Namespace
 
-from fornax.utils.argparser import DynamicArgumentParser
-from fornax.utils.repository import RepositoryFactory
+from fornax.argparser import DynamicArgumentParser
+from fornax.stages import StageFactory
 
 
 class Pipeline:
@@ -14,17 +13,13 @@ class Pipeline:
         :type args: Namespace
         """
         self._args = args
-        os.makedirs(self._args.workspace, exist_ok=True)
-        self._repo = RepositoryFactory().create(
-            self._args.repository_type,
-            repository_address=self._args.repository,
-            branch=self._args.branch,
-            workspace=self._args.workspace,
-        )
+        self._args.workspace.mkdir(parents=True, exist_ok=True)
+        self._args.repository_storage_path.mkdir(parents=True, exist_ok=True)
+        self._stage = StageFactory().create(self._args.stage, args=self._args)
 
     def execute(self) -> None:
         """Execute pipeline."""
-        self._repo.sync()
+        self._stage.run()
 
 
 if __name__ == "__main__":

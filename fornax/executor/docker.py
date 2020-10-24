@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from .command import Command
 from .process import Process
 from .executor import Executor
@@ -5,15 +7,17 @@ from .exceptions import ExecutorError
 
 
 class DockerExecutor(Executor):
-    def __init__(self, image_name: str, container_name: str = "fornax_executor") -> None:
+    def __init__(self, workspace: Path, image_name: str, container_name: str = "fornax_executor") -> None:
         """Initialize docker executor.
 
+        :param workspace: workspace dedicated output files e.g. logs
+        :type workspace: str
         :param image_name: docker image name with tag
         :type image_name: str
         :param container_name: container name, defaults to "fornax_executor"
         :type container_name: str, optional
         """
-        super().__init__()
+        super().__init__(workspace)
         self.__image_name = image_name
         self.__container_name = container_name
 
@@ -36,7 +40,7 @@ class DockerExecutor(Executor):
             raise ExecutorError("Cannot run docker container.")
 
     def run(self, command: Command) -> Process:
-        """Run command inside docker container.
+        """Run command.
 
         :param command: command to run
         :type command: Command
@@ -48,7 +52,7 @@ class DockerExecutor(Executor):
             cmd.append("-d")
 
         if command.cwd:
-            cmd.extend(["-w", command.cwd])
+            cmd.extend(["-w", str(command.cwd)])
 
         cmd.append(self.__image_name)
         cmd.extend(command.args)

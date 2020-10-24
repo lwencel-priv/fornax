@@ -1,5 +1,5 @@
 from fornax.utils.generics.factory import GenericFactory
-from fornax.utils.argparser.consts import Environment
+from fornax.consts import Environment
 from .executor import Executor
 from .bash_shell import BashShellExecutor
 from .docker import DockerExecutor

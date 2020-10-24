@@ -1,23 +1,31 @@
 import subprocess
 import datetime
+import uuid
+from pathlib import Path
 from threading import Thread
-from typing import Optional
+from typing import Optional, Iterable
 
 from fornax.logger import console_logger, main_logger
 from ..command import Command
 
 
 class Process:
-    def __init__(self, command: Command) -> None:
+    def __init__(self, command: Command, workspace: Path) -> None:
         """Initialize process.
 
         :param command: command to run
         :type command: Command
+        :param workspace: workspace for output
+        :type workspace: Path
         """
+        workspace.mkdir(parents=True, exist_ok=True)
+        process_uuid = uuid.uuid4()
+        self._stdout_log = workspace.joinpath(f"{process_uuid}_stdout.log")
+        self._stderr_log = workspace.joinpath(f"{process_uuid}_stderr.log")
         self._command = command
-        self._return_code: Optional[int] = None
 
         main_logger.debug(f"Running: {self._command}")
+        self._return_code: Optional[int] = None
         self._start_time: datetime.datetime = datetime.datetime.utcnow()
         self._stop_time: Optional[datetime.datetime] = None
         self._process = subprocess.Popen(
@@ -46,13 +54,37 @@ class Process:
 
     def _collect_stdout(self) -> None:
         """Collect stdout."""
-        for line in self._process.stdout:  # type: ignore
-            console_logger.info(line.strip())
+        with open(self._stdout_log, "w") as stdout_stream:
+            for line in self._process.stdout:  # type: ignore
+                console_logger.info(line.strip())
+                stdout_stream.write(line)
 
     def _collect_stderr(self) -> None:
         """Collect stderr."""
-        for line in self._process.stderr:  # type: ignore
-            console_logger.warning(line.strip())
+        with open(self._stderr_log, "w") as stderr_stream:
+            for line in self._process.stderr:  # type: ignore
+                console_logger.warning(line.strip())
+                stderr_stream.write(line)
+
+    @property
+    def stdout(self) -> Iterable[str]:
+        """Return standard output iterator.
+
+        :return: return standard output iterator
+        :rtype: Iterable[str]
+        """
+        with open(self._stdout_log, "r") as stream:
+            yield from stream
+
+    @property
+    def stderr(self) -> Iterable[str]:
+        """Return standard error iterator.
+
+        :return: return standard error iterator
+        :rtype: Iterable[str]
+        """
+        with open(self._stderr_log, "r") as stream:
+            yield from stream
 
     @property
     def return_code(self) -> Optional[int]:

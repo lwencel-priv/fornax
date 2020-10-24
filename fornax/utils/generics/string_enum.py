@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ArgEnum(Enum):
+class StringEnum(Enum):
     """Argparser argument enum."""
 
     def __str__(self) -> str:
@@ -13,12 +13,12 @@ class ArgEnum(Enum):
         return self.name.lower()
 
     @classmethod
-    def from_string(cls, value: str) -> "ArgEnum":
+    def from_string(cls, value: str) -> "StringEnum":
         """Create enum from a string.
 
         :raises ValueError: not supported enum value
-        :return: ArgEnum instance
-        :rtype: ArgEnum
+        :return: StringEnum instance
+        :rtype: StringEnum
         """
         try:
             return cls[value.upper()]

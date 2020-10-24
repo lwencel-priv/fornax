@@ -1,15 +1,16 @@
 import json
+from pathlib import Path
 from typing import List, Optional
 
 
 class Command:
-    def __init__(self, args: List[str], cwd: Optional[str] = None, daemon: bool = False) -> None:
+    def __init__(self, args: List[str], cwd: Optional[Path] = None, daemon: bool = False) -> None:
         """Initialize command.
 
         :param args: command args
         :type args: List[str]
         :param cwd: command working directory, defaults to None
-        :type cwd: Optional[str], optional
+        :type cwd: Optional[Path], optional
         :param daemon: run command as daemon, defaults to False
         :type daemon: bool, optional
         """
@@ -27,11 +28,11 @@ class Command:
         return self._args
 
     @property
-    def cwd(self) -> Optional[str]:
+    def cwd(self) -> Optional[Path]:
         """Return command working directory.
 
         :return: command working directory
-        :rtype: Optional[str]
+        :rtype: Optional[Path]
         """
         return self._cwd
 
@@ -53,7 +54,7 @@ class Command:
         return json.dumps(
             {
                 "args": self._args,
-                "cwd": self._cwd,
+                "cwd": str(self._cwd),
                 "daemon": self._daemon,
             }
         )

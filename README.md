@@ -4,11 +4,13 @@
 ## Usage example
 ```bash
 python fornax/main.py \
-    --stage=sync_repositories
-    --repo=https://github.com/lwencel-priv/fornax.git \
-    --repo_type=git \
+    --stage=sync \
+    --source_path=https://github.com/lwencel-priv/fornax.git \
+    --source_path_type=repository_address \
+    --manifest_type=none \
     --branch=master \
-    --workspace="./tmp/"
+    --repository_storage_path="./tmp/repositories" \
+    --workspace="./tmp/logs"
 ```
 
 # License

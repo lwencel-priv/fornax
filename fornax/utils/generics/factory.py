@@ -31,7 +31,7 @@ class GenericFactory(Generic[KEY_TYPE, OBJECT_TYPE]):
 
         self.__builders[name] = builder
 
-    def create(self, name: KEY_TYPE, **kwargs: Dict[str, Any]) -> OBJECT_TYPE:
+    def create(self, name: KEY_TYPE, **kwargs: Any) -> OBJECT_TYPE:
         """Create class instance.
 
         :param name: builder name
