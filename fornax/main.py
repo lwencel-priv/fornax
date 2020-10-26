@@ -22,8 +22,13 @@ class Pipeline:
         self._stage.run()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point."""
     parser = DynamicArgumentParser(description="Project build pipeline.")
     args = parser.parse_args(sys.argv[1:])
     pipeline = Pipeline(args)
     pipeline.execute()
+
+
+if __name__ == "__main__":
+    main()
