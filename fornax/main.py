@@ -16,6 +16,10 @@ class Pipeline:
         self._args.workspace.mkdir(parents=True, exist_ok=True)
         self._args.repository_storage_path.mkdir(parents=True, exist_ok=True)
         self._stage = StageFactory().create(self._args.stage, args=self._args)
+            repository_address=self._args.repository,
+            branch=self._args.branch,
+            workspace=self._args.workspace,
+        )
 
     def execute(self) -> None:
         """Execute pipeline."""

@@ -12,7 +12,6 @@ from ..command import Command
 class Process:
     def __init__(self, command: Command, workspace: Path) -> None:
         """Initialize process.
-
         :param command: command to run
         :type command: Command
         :param workspace: workspace for output
