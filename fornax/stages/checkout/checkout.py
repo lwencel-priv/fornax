@@ -5,7 +5,7 @@ from fornax.consts import StageType
 from ..base_stage import BaseStage
 
 
-class PrepareEnvironmentStage(BaseStage):
+class CheckoutStage(BaseStage):
     def __init__(self, prev_stages_args: Dict[StageType, Namespace], args: Namespace):
         """Initialize sync stage.
 
@@ -18,4 +18,5 @@ class PrepareEnvironmentStage(BaseStage):
 
     def _run(self) -> None:
         """Run sync stage."""
-        pass
+        # This stage is not ready
+        print(self._args, self._prev_stages_args)

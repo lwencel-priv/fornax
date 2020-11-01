@@ -1,2 +1,2 @@
 """Stages package."""
-from .factory import StageFactory
+from .state_machine import StageStateMachine

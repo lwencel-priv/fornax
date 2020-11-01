@@ -2,7 +2,7 @@ from pathlib import Path
 from argparse import ArgumentParser, Namespace
 from typing import List, Dict, Any
 
-from fornax.consts import Stage, ManifestType, SourcePathType
+from fornax.consts import StageType, ManifestType, SourcePathType
 
 
 class DynamicArgumentParser:
@@ -12,17 +12,34 @@ class DynamicArgumentParser:
         :param description: argparser description
         :type description: str
         """
+        self.__parser_manifest_name = "state.json"
         self._parser = ArgumentParser(description=description)
         self._parser.add_argument(
             "--stage",
             dest="stage",
             required=True,
-            type=Stage.from_string,  # type: ignore
-            choices=list(Stage),
+            type=StageType.from_string,  # type: ignore
+            choices=list(StageType),
             help="stage name",
         )
+        default_workspace = str(Path.cwd().joinpath("fornax_data", "workspace"))
+        self._parser.add_argument(
+            "--workspace",
+            dest="workspace",
+            default=default_workspace,
+            type=Path,
+            help=f"workspace path. Default: {default_workspace}",
+        )
+        default_repository_storage_path = str(Path.cwd().joinpath("fornax_data", "repositories"))
+        self._parser.add_argument(
+            "--repository_storage_path",
+            dest="repository_storage_path",
+            default=default_repository_storage_path,
+            type=Path,
+            help=f"workspace path. Default: {default_repository_storage_path}",
+        )
 
-    def _get_stage_parameters(self, stage: Stage) -> Dict[str, Any]:
+    def _get_stage_parameters(self, stage: StageType) -> Dict[str, Any]:
         """Get stage specific parameters.
 
         :param stage: stage name
@@ -30,24 +47,8 @@ class DynamicArgumentParser:
         :return: stage specific parameters
         :rtype: dict
         """
-        default_workspace = str(Path.cwd().joinpath("fornax_data", "workspace"))
-        default_repository_storage_path = str(Path.cwd().joinpath("fornax_data", "repositories"))
-        parameters: Dict[str, Any] = {
-            "--workspace": {
-                "dest": "workspace",
-                "default": default_workspace,
-                "type": Path,
-                "help": f"workspace path. Default: {default_workspace}",
-            },
-            "--repository_storage_path": {
-                "dest": "repository_storage_path",
-                "default": default_repository_storage_path,
-                "type": Path,
-                "help": f"directory where all repositories will be stored. Default: {default_repository_storage_path}",
-            },
-        }
-        stage_specific_params: Dict[Stage, Dict[str, Any]] = {
-            Stage.SYNC: {
+        stage_specific_params: Dict[StageType, Dict[str, Any]] = {
+            StageType.SYNC: {
                 "--source_path": {
                     "dest": "source_path",
                     "required": True,
@@ -76,14 +77,35 @@ class DynamicArgumentParser:
                     "help": "used only if source_path_type is 'repository_address'.",
                 },
             },
-            Stage.PREPARE_ENVIRONMENT: {},
-            Stage.BUILD: {},
-            Stage.TEST: {},
+            StageType.CHECKOUT: {
+                "--project": {
+                    "dest": "project",
+                    "required": True,
+                    "help": "Project name",
+                },
+                "--refs": {
+                    "dest": "refs",
+                    "required": False,
+                    "help": "Refs to checkout",
+                },
+                "--branch": {
+                    "dest": "branch",
+                    "required": False,
+                    "help": "Branch to checkout",
+                },
+                "--commit": {
+                    "dest": "commit",
+                    "required": False,
+                    "help": "Commit to checkout",
+                },
+            },
+            StageType.PREPARE_ENVIRONMENT: {},
+            StageType.BUILD: {},
+            StageType.TEST: {},
         }
-        parameters.update(stage_specific_params.get(stage, {}))
-        return parameters
+        return stage_specific_params.get(stage, {})
 
-    def parse_args(self, args: List[str]) -> Namespace:
+    def parse_args(self, raw_args: List[str]) -> Namespace:
         """Parser arguments.
 
         :param args: list of raw args
@@ -93,7 +115,7 @@ class DynamicArgumentParser:
         """
         # Remove '-h' and '--help' at this step to prepare a final parser and then show help message.
         # Set is required to remove possible duplicates
-        initial_args = set(args)
+        initial_args = set(raw_args)
         if any("--stage" in arg for arg in initial_args):
             initial_args.discard("-h")
             initial_args.discard("--help")
@@ -103,4 +125,5 @@ class DynamicArgumentParser:
         for key, value in stage_specific_parameters.items():
             self._parser.add_argument(key, **value)
 
-        return self._parser.parse_args(args)
+        args = self._parser.parse_args(raw_args)
+        return args
