@@ -45,7 +45,7 @@ class DynamicArgumentParser:
                     "dest": "repository_storage_path",
                     "default": default_repository_storage_path,
                     "type": Path,
-                    "help": f"workspace path. Default: {default_repository_storage_path}"
+                    "help": f"workspace path. Default: {default_repository_storage_path}",
                 },
                 "--source_path": {
                     "dest": "source_path",
