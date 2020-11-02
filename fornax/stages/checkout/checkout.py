@@ -7,7 +7,7 @@ from ..base_stage import BaseStage
 
 class CheckoutStage(BaseStage):
     def __init__(self, prev_stages_args: Dict[StageType, Namespace], args: Namespace):
-        """Initialize sync stage.
+        """Initialize checkout stage.
 
         :param args: pipeline args
         :type args: Namespace
@@ -17,6 +17,7 @@ class CheckoutStage(BaseStage):
         super().__init__(prev_stages_args, args)
 
     def _run(self) -> None:
-        """Run sync stage."""
+        """Run checkout stage."""
         # This stage is not ready
+        # Placeholder
         print(self._args, self._prev_stages_args)

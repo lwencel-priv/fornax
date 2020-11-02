@@ -12,7 +12,6 @@ class DynamicArgumentParser:
         :param description: argparser description
         :type description: str
         """
-        self.__parser_manifest_name = "state.json"
         self._parser = ArgumentParser(description=description)
         self._parser.add_argument(
             "--stage",
@@ -30,14 +29,6 @@ class DynamicArgumentParser:
             type=Path,
             help=f"workspace path. Default: {default_workspace}",
         )
-        default_repository_storage_path = str(Path.cwd().joinpath("fornax_data", "repositories"))
-        self._parser.add_argument(
-            "--repository_storage_path",
-            dest="repository_storage_path",
-            default=default_repository_storage_path,
-            type=Path,
-            help=f"workspace path. Default: {default_repository_storage_path}",
-        )
 
     def _get_stage_parameters(self, stage: StageType) -> Dict[str, Any]:
         """Get stage specific parameters.
@@ -47,8 +38,15 @@ class DynamicArgumentParser:
         :return: stage specific parameters
         :rtype: dict
         """
+        default_repository_storage_path = str(Path.cwd().joinpath("fornax_data", "repositories"))
         stage_specific_params: Dict[StageType, Dict[str, Any]] = {
             StageType.SYNC: {
+                "--repository_storage_path": {
+                    "dest": "repository_storage_path",
+                    "default": default_repository_storage_path,
+                    "type": Path,
+                    "help": f"workspace path. Default: {default_repository_storage_path}"
+                },
                 "--source_path": {
                     "dest": "source_path",
                     "required": True,

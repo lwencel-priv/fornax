@@ -4,7 +4,6 @@ from argparse import Namespace
 
 from fornax.consts import StageType
 from fornax.utils.file_processors import PickleProcessor
-from fornax.logger import main_logger
 from .transision import Transition
 from .base_stage import BaseStage
 from .sync import SyncStage
@@ -52,8 +51,6 @@ class StageStateMachine:
 
         :param args: stage args
         :type args: Namespace
-        :return: next stage instance
-        :rtype: Stage
         """
         if self._current_transition is None and args.stage != StageType.SYNC:
             raise ValueError(f"Cannot switch to {args.stage}. Allowed stages: {StageType.SYNC}.")
@@ -93,6 +90,8 @@ class StageStateMachine:
     def _update_args(self, transition: Transition, new_args: Namespace) -> None:
         """Update known args.
 
+        :param transition: transition instance
+        :type transition: Transition
         :param new_args: new args to add
         :type new_args: Namespace
         """
@@ -106,7 +105,10 @@ class StageStateMachine:
         """Save state."""
         self._data_processor.write(
             self._state_file_path,
-            {"args": self._args, "current_transition": self._current_transition},
+            {
+                "args": self._args,
+                "current_transition": self._current_transition,
+            },
         )
 
     def __load_sate(self) -> None:

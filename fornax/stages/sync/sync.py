@@ -1,5 +1,6 @@
 from argparse import Namespace
 from typing import Dict
+from shutil import rmtree
 
 from fornax.utils.repository import RepositoryFactory
 from fornax.consts import StageType
@@ -16,6 +17,9 @@ class SyncStage(BaseStage):
         :type prev_stages_args: Dict[StageType, Namespace]
         """
         super().__init__(prev_stages_args, args)
+        rmtree(args.workspace)
+        args.workspace.mkdir(parents=True, exist_ok=True)
+        args.repository_storage_path.mkdir(parents=True, exist_ok=True)
         self._repo = RepositoryFactory().create(
             self._args.manifest_type,
             source_path=self._args.source_path,

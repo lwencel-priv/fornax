@@ -12,8 +12,6 @@ class Pipeline:
         :param args: pipeline args
         :type args: Namespace
         """
-        args.workspace.mkdir(parents=True, exist_ok=True)
-        args.repository_storage_path.mkdir(parents=True, exist_ok=True)
         self._stage_state = StageStateMachine(args.workspace)
         self._stage_state.next_stage(args)
 
