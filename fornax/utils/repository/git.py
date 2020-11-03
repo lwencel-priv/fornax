@@ -1,6 +1,8 @@
 import re
 from pathlib import Path
+from typing import Optional
 
+from fornax.executor import BashShellExecutor
 from fornax.consts import SourcePathType
 from fornax.executor.command import Command
 from fornax.logger import main_logger
@@ -9,7 +11,12 @@ from .repository import Repository
 
 class Git(Repository):
     def __init__(
-        self, source_path: str, source_path_type: SourcePathType, branch: str, repo_storage: Path, workspace: Path
+        self,
+        source_path: str,
+        source_path_type: SourcePathType,
+        branch: str,
+        repo_storage: Path,
+        workspace: Path,
     ):
         """Initialize Git repository.
 
@@ -28,11 +35,25 @@ class Git(Repository):
         if self._source_path_type is not SourcePathType.REPOSITORY_ADDRESS:
             raise ValueError("Git class does not support 'SourcePathType' different than REPOSITORY_ADDRESS.")
 
-        repository_name = re.match(r".*\/([^\/]+)\.git.*", self._source_path)
-        if repository_name is None:
-            raise ValueError(f"Unable to get repository name from repository address: {repository_name}")
+        repository_name_match = re.match(r".*\/([^\/]+)\.git.*", self._source_path)
+        if repository_name_match is None:
+            raise ValueError(f"Unable to get repository name from repository address: {repository_name_match}")
 
-        self._repository_path = self._repo_storage.joinpath(repository_name.group(1))
+        self._repository_path = self._repo_storage.joinpath(repository_name_match.group(1))
+
+    @classmethod
+    def init_from_path(cls, workspace: Path, repo_storage: Path, project: str) -> "Git":
+        """Initialize repository from path.
+
+        :param workspace: directory where logs are stored
+        :type workspace: Path
+        :param repo_storage: directory where repositories will be stored
+        :type repo_storage: Path
+        :param project: project name
+        :type project: str
+        """
+        remote = cls._get_remote(repo_storage.joinpath(project), workspace)
+        return cls(remote, SourcePathType.REPOSITORY_ADDRESS, "master", repo_storage, workspace)
 
     def sync(self) -> None:
         """Synchronize repositories."""
@@ -67,9 +88,26 @@ class Git(Repository):
         """Fetch changes."""
         self._executor.run(Command(["git", "fetch"], cwd=self._repository_path))
 
-    def checkout(self, branch: str) -> None:
-        """Checkout to specific branch."""
-        self._executor.run(Command(["git", "checkout", self._branch], cwd=self._repository_path))
+    def checkout(self, refs: Optional[str] = None, branch: Optional[str] = None, commit: Optional[str] = None) -> None:
+        """Checkout to specific revision.
+
+        :param refs: refs, defaults to None
+        :type refs: Optional[str], optional
+        :param branch: branch name, defaults to None
+        :type branch: Optional[str], optional
+        :param commit: commit sha, defaults to None
+        :type commit: Optional[str], optional
+        :raises ValueError: Not supported option
+        """
+        if refs is not None:
+            self._executor.run(Command(["git", "fetch", self._source_path, refs], cwd=self._repository_path))
+            self._executor.run(Command(["git", "checkout", "FETCH_HEAD"], cwd=self._repository_path))
+        elif branch is not None:
+            self._executor.run(Command(["git", "checkout", branch], cwd=self._repository_path))
+        elif commit is not None:
+            self._executor.run(Command(["git", "checkout", commit], cwd=self._repository_path))
+        else:
+            raise ValueError("Not supported option.")
 
     def pull(self) -> None:
         """Pull changes."""
@@ -80,8 +118,23 @@ class Git(Repository):
         self.reset()
         self.clean()
         self.fetch()
-        if self._branch is not None:
-            if self._branch in self._executor.run(Command(["git", "branch"], cwd=self._repository_path)).stdout:
-                self.checkout(self._branch)
+        self.checkout(branch=self._branch)
+        self.pull()
 
-            self.pull()
+    @staticmethod
+    def _get_remote(repository_path: Path, workspace: Path) -> str:
+        """Return repository remote address.
+
+        :param repository_path: path to repository
+        :type repository_path: Path
+        :return: repository remote address
+        :rtype: str
+        """
+        executor = BashShellExecutor(workspace)
+        process = executor.run(Command(["git", "remote", "-v"], cwd=repository_path))
+        remote = next(process.stdout).strip()  # type: ignore
+        remote_match = re.match(r"(^.*?)\s+(.*?)\s+", remote)
+        if remote_match is None:
+            raise ValueError("Remote not found.")
+
+        return str(remote_match.group(2))

@@ -18,7 +18,7 @@ python fornax/main.py \
     --workspace="./tmp/logs" \
     --stage=checkout \
     --project=fornax \
-    --branch=develop
+    --commit=11e0273ef3b8e94fa40bc06479db235d2be37878
 
 # PREPARE_ENVIRONMENT stage
 python fornax/main.py \

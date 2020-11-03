@@ -7,6 +7,7 @@ from typing import Optional, Iterable
 
 from fornax.logger import console_logger, main_logger
 from ..command import Command
+from .exceptions import ProcessExecException
 
 
 class Process:
@@ -41,6 +42,9 @@ class Process:
         self._data_collector_thread.start()
         if not self._command.daemon:
             self._data_collector_thread.join()
+
+        if self._return_code not in [None, 0]:
+            raise ProcessExecException(f"Process exited with unexpected exit code: {self._return_code}")
 
     def __flow(self) -> None:
         stdout_thread = Thread(target=self._collect_stdout, daemon=True)

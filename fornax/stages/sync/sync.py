@@ -17,7 +17,7 @@ class SyncStage(BaseStage):
         :type prev_stages_args: Dict[StageType, Namespace]
         """
         super().__init__(prev_stages_args, args)
-        rmtree(args.workspace)
+        rmtree(args.workspace, ignore_errors=True)
         args.workspace.mkdir(parents=True, exist_ok=True)
         args.repository_storage_path.mkdir(parents=True, exist_ok=True)
         self._repo = RepositoryFactory().create(
