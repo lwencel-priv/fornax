@@ -35,6 +35,7 @@ setup(
     classifiers=[
         "Development Status :: 3 - Alpha"
         "Programming Language :: Python :: 3",
+        "Natural Language :: English",
         "License :: OSI Approved :: MIT License",
     ],
     entry_points={

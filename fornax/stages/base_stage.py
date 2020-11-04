@@ -18,6 +18,7 @@ class BaseStage(ABC):
         self._args = args
         self._prev_stages_args = prev_stages_args
         self._workspace = self._args.workspace.joinpath("stage", type(self).__name__)
+        self._local_manifests_dir = self._args.workspace.joinpath("manifests")
 
     @abstractmethod
     def _run(self) -> None:

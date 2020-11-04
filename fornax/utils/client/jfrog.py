@@ -13,7 +13,6 @@ class JFrog(BaseClient):
         :type executor: Executor
         """
         super().__init__(executor)
-        # Load credentials
 
     def download(self, source: str, destination: Path) -> None:
         """Download artifact.
@@ -23,9 +22,9 @@ class JFrog(BaseClient):
         :param destination: destination directory
         :type destination: Path
         """
-        self._executor.run(Command(["jfrog", "download", ""]))
+        self._executor.run(Command(["jfrog", "rt", "download", source, str(destination)]))
 
-    def upload(self, source: Path, destination: str) -> None:
+    def upload(self, source: Path, destination: str, recursive: bool = False) -> None:
         """Upload artifact.
 
         :param source: artifact source path e.g. /home/user/example.log
@@ -33,4 +32,5 @@ class JFrog(BaseClient):
         :param destination: destination directory
         :type destination: Path
         """
-        self._executor.run(Command(["jfrog", "upload", ""]))
+        cmd = ["jfrog", "rt", "upload", str(source), destination, f"--recursive={str(recursive).lower()}"]
+        self._executor.run(Command(cmd))

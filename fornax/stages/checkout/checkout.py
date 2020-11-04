@@ -21,6 +21,7 @@ class CheckoutStage(BaseStage):
             project=self._args.project,
             repo_storage=sync_args.repository_storage_path,
             workspace=self._workspace,
+            local_manifests_storage=self._local_manifests_dir,
         )
 
     def _run(self) -> None:

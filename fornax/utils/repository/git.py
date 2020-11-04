@@ -17,6 +17,7 @@ class Git(Repository):
         branch: str,
         repo_storage: Path,
         workspace: Path,
+        local_manifests_storage: Path,
     ):
         """Initialize Git repository.
 
@@ -30,30 +31,36 @@ class Git(Repository):
         :type repo_storage: Path
         :param workspace: directory where logs are stored
         :type workspace: Path
+        :param local_manifests_storage: local storage for manifests files
+        :type local_manifests_storage: Path
         """
-        super().__init__(source_path, source_path_type, branch, repo_storage, workspace)
+        super().__init__(source_path, source_path_type, branch, repo_storage, workspace, local_manifests_storage)
         if self._source_path_type is not SourcePathType.REPOSITORY_ADDRESS:
             raise ValueError("Git class does not support 'SourcePathType' different than REPOSITORY_ADDRESS.")
 
-        repository_name_match = re.match(r".*\/([^\/]+)\.git.*", self._source_path)
-        if repository_name_match is None:
-            raise ValueError(f"Unable to get repository name from repository address: {repository_name_match}")
+        repository_name = self._source_path.strip("/").split("/")[-1].replace(".git", "")
+        if repository_name is None:
+            raise ValueError(f"Unable to get repository name from repository address: {repository_name}")
 
-        self._repository_path = self._repo_storage.joinpath(repository_name_match.group(1))
+        self._repository_path = self._repo_storage.joinpath(repository_name)
 
     @classmethod
-    def init_from_path(cls, workspace: Path, repo_storage: Path, project: str) -> "Git":
+    def init_from_path(cls, workspace: Path, repo_storage: Path, local_manifests_storage: Path, project: str) -> "Git":
         """Initialize repository from path.
 
         :param workspace: directory where logs are stored
         :type workspace: Path
         :param repo_storage: directory where repositories will be stored
         :type repo_storage: Path
+        :param local_manifests_storage: local storage for manifests files
+        :type local_manifests_storage: Path
         :param project: project name
         :type project: str
         """
         remote = cls._get_remote(repo_storage.joinpath(project), workspace)
-        return cls(remote, SourcePathType.REPOSITORY_ADDRESS, "master", repo_storage, workspace)
+        return cls(
+            remote, SourcePathType.REPOSITORY_ADDRESS, "master", repo_storage, workspace, local_manifests_storage
+        )
 
     def sync(self) -> None:
         """Synchronize repositories."""

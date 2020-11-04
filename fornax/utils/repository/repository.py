@@ -9,7 +9,13 @@ class Repository(ABC):
     """Abstract repository class."""
 
     def __init__(
-        self, source_path: str, source_path_type: SourcePathType, branch: str, repo_storage: Path, workspace: Path
+        self,
+        source_path: str,
+        source_path_type: SourcePathType,
+        branch: str,
+        repo_storage: Path,
+        workspace: Path,
+        local_manifests_storage: Path,
     ):
         """Initialize Git repository.
 
@@ -23,12 +29,15 @@ class Repository(ABC):
         :type repo_storage: Path
         :param workspace: directory where logs are stored
         :type workspace: Path
+        :param local_manifests_storage: local storage for manifests files
+        :type local_manifests_storage: Path
         """
         self._source_path = source_path
         self._source_path_type = source_path_type
         self._branch = branch
         self._repo_storage = repo_storage
         self._workspace = workspace
+        self._local_manifests_storage = local_manifests_storage
         self._executor = BashShellExecutor(self._workspace)
 
     def sync(self) -> None:
