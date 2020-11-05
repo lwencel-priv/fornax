@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from pathlib import Path
 
 from .command import Command
@@ -16,6 +16,7 @@ class Executor(ABC):
         """
         self._workspace = workspace
 
+    @abstractmethod
     def run(self, command: Command) -> Process:
         """Run command.
 
