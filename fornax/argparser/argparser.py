@@ -97,7 +97,37 @@ class DynamicArgumentParser:
                     "help": "Commit to checkout",
                 },
             },
-            StageType.PREPARE_ENVIRONMENT: {},
+            StageType.PREPARE_ENVIRONMENT: {
+                "--project": {
+                    "dest": "project",
+                    "required": True,
+                    "help": "Project name",
+                },
+                "--dockerfile_path": {
+                    "dest": "dockerfile_path",
+                    "required": False,
+                    "default": None,
+                    "help": "Relative path to dockerfile from project/repoditory root directory",
+                },
+                "--docker_image_name": {
+                    "dest": "docker_image_name",
+                    "required": False,
+                    "default": None,
+                    "help": "Name of docker image that will be built",
+                },
+                "--cache_from": {
+                    "dest": "cache_from",
+                    "required": False,
+                    "default": None,
+                    "help": "Name of image used as cache for build procedure",
+                },
+                "--push": {
+                    "dest": "push",
+                    "required": False,
+                    "default": None,
+                    "help": "Push docker image to docker registry after successful build",
+                },
+            },
             StageType.BUILD: {},
             StageType.TEST: {},
         }

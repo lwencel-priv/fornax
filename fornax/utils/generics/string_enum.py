@@ -23,4 +23,4 @@ class StringEnum(Enum):
         try:
             return cls[value.upper()]
         except KeyError:
-            raise ValueError()
+            raise ValueError("Not supported option.")
